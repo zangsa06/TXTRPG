@@ -1,48 +1,35 @@
 ﻿#include "Boss.h"
-#include <iostream>
+#include <cstdio>
+#include <cstdlib>
 
-Boss::Boss(int floor)
+Boss::Boss(std::string name, int floor, MonsterType type)
+	: Monster(name, floor, type)
 {
-	Boss(int floor) : Monster(static_cast<MonsterType>(rand() % MonsterCount), floor)
+	MaxHP *= 2;
+	HP = MaxHP;
+	Attack += 10;
+	Defense += 5;
+	DropExp *= 3;
+	DropSoul *= 3;
+}
+
+void Boss::SpecialSkill()
+{
+	int Possib = rand() % 1;
+	if (Possib == 0)
 	{
-		switch (floor)
+		printf("%s의 공격력이 두 배 오릅니다.\n", Name.c_str());
+		Attack *= 2;
+	}
+	else if (Possib == 1)
+	{
+		int heal = MaxHP / 4;
+		HP += heal;
+		if (HP > MaxHP)
 		{
-		case 10:
-			name = "Warden";
-			break;
-		case 20:
-			name = "Lich King";
-			break;
-		case 30:
-			name = "Stone Golem";
-			break;
-		case 40:
-			name = "Dragon";
-			break;
-		case 50:
-			name = "Tower Guardian";
-			break;
-		default:
-			name = "Unknown";
-			break;
+			HP = MaxHP;
 		}
-		HP = static_cast<int>(HP * 2.0);
-		Attack = static_cast<int>(Attack * 1.5);
-		Defense = static_cast<int>(Defense * 1.5);
-		DropGold *= 3;
-		DropExp *= 3;
+		printf("%s가 체력을 회복합니다. +%d HP\n", Name.c_str(), heal);
 	}
 }
-
-int Boss::AttackPattern(int PlayerDef)
-{
-	int Damage = 0;
-	int Choice = rand() % 100;
-
-	if (name == "Warden" && HP < 50)
-	{
-		printf("파수꾼이 강력한 공격을 합니다.\n");
-		Damage = (Attack - PlayerDef) * 2.0;
-	}
-	return Damage;
-}
+	

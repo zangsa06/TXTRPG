@@ -2,7 +2,20 @@
 #include <cstdio>
 #include <iostream>
 
-void TakeDamage(int Damage)
+Player::Player(std::string name)
+{
+	Name = name;
+	Level = 1;
+	MaxHP = 100;
+	HP = 100;
+	Attack = 10;
+	Defense = 5;
+	Exp = 0;
+	Soul = 0;
+	Shield = false;
+	Weapon = Sword;
+}
+void Player::TakeDamage(int Damage)
 {
 	if (Shield)
 	{
@@ -11,9 +24,13 @@ void TakeDamage(int Damage)
 		printf("방어 강화로 피해 절반 감소\n");
 	}
 	HP -= Damage;
+	if (HP < 0)
+	{
+		HP = 0;
+	}
 }
 
-void Heal(int Amount)
+void Player::Heal(int Amount)
 {
 	HP += Amount;
 	if (HP > MaxHP)
@@ -22,23 +39,28 @@ void Heal(int Amount)
 	}
 }
 
-void SpendGold(int gold)
+void Player::Spend(int soul)
 {
-	if (DropGold >= gold)
+	if (Soul >= soul)
 	{
-		DropGold -= gold;
+		Soul -= soul;
 	}
 }
 
-void AddExp(int exp)
+void Player::AddExp(int exp)
 {
-	DropExp += exp;
+	Exp += exp;
 	int Require = 50 * Level;
-	if (DropExp >= Require)
+	printf("현재 경험치 : %d\n", Exp);
+	if (Exp < Require)
+	{
+		printf("레벨업까지 남은 경험치 : % d\n", Require - Exp);
+	}
+	else if (Exp >= Require)
 	{
 		Level++;
-		DropExp -= Require;
-		printf("레벨업\n현재 레벨 : %d", Level);
+		Exp -= Require;
+		printf("레벨업\n현재 레벨 : %d\n잔여 경험치 : %d\n", Level, Exp);
 		int Point = Level;
 		while (Point > 0)
 		{
@@ -60,55 +82,32 @@ void AddExp(int exp)
 			}
 			Point--;
 		}
+		HP = MaxHP;
+		printf("현재 체력\t: %d\n", MaxHP);
+		printf("현재 공격력\t: %d\n", Attack);
+		printf("현재 방어력\t: %d\n", Defense);
 	}
 }
 
-void AddItem(const Item& item)
+void Player::AttackMonster(Monster* m)
 {
-	Inventory.push_back(item);
-	printf("아이템 획득 : [%s][%s]\n", item.name, item.effect);
-}
-
-void ShowStatus()
-{
-	printf("[레벨 %d]\n체력 : %d/%d\n공격 : %d\n방어 : %d\n골드 소지금 : %d\n현재 경험치 : %d\n", Level, HP, MaxHP, Defense, DropGold, DropExp);
-}
-
-void UseSkill()
-{
-	printf("사용할 스킬 선택\n1. 강타\n2. 방어\n3. 회복\n");
-	int Choice = 0;
-	std::cin >> Choice;
-	switch (Choice)
+	int Damage = Attack - m->Defense;
+	if (Damage < 1)
 	{
-	case 1:
-		PowerStrike = true;
-		printf("다음 공격이 2배의 피해를 입힙니다.\n");
-		break;
-	case 2:
-		Shield = true;
-		printf("다음 턴에 받는 피해가 절반으로 감소합니다.\n");
-		break;
-	case 3:
-		Heal(30);
-		printf("즉시 체력 30 회복\n");
-		break;
-	default:
-		printf("스킬 취소\n");
-		break;
+		Damage = 1;
 	}
-}
-
-int AttackMonster(int BaseAttack, Monster* m, int WeaponMultiply)
-{
-	int Damage = (BaseAttack - m->GetDefense()) * WeaponMultiply;
-	if (PowerStrike)
+	if ((Weapon == Sword && m->Type == Undead)
+		|| (Weapon == Spear && m->Type == Giant)
+		|| (Weapon == Bow && m->Type == Beast))
 	{
-		Damage * 2;
-		PowerStrike = false;
-		printf("피해가 2배로 적용됩니다.\n");
+		Damage *= 2;
+		printf("상성인 무기로 2배의 피해를 입힙니다.\n");
 	}
-	return Damage;
+	m->HP -= Damage;
+	std::cout << m->Name << "(이)가 " << Damage << "의 피해를 입습니다.\n";
+	if (m->HP < 0)
+	{
+		m->HP = 0;
+	}
+	std::cout << m->Name << "의 현재 체력 : " << m->HP << "\n";
 }
-
-

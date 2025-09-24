@@ -4,10 +4,8 @@
 class Boss : public Monster
 {
 public:
-	Boss(int floor);
+	Boss(std::string name, int floor, MonsterType type);
 
-	int AttackPattern(int PlayerDef);
-
-
+	void SpecialSkill();
 };
 
